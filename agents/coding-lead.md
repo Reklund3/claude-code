@@ -11,7 +11,7 @@ hooks:
     - matcher: "Agent"
       hooks:
         - type: command
-          command: "${CLAUDE_PROJECT_DIR}/hooks/coding-lead-agent-guard.sh"
+          command: "$HOME/.claude/hooks/coding-lead-agent-guard.sh"
 ---
 
 Role: Senior Technical Lead / Implementation Manager.

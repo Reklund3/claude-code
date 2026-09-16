@@ -9,6 +9,8 @@ The same global-vs-project split applies to hooks and settings below. Pick one s
 
 ## 1. Install the agents
 
+**Shortcut:** for a **global** install, you can skip the manual `cp` commands in this section and in step 2 below by running `./scripts/sync-claude-config.sh` once after cloning. It symlinks every file in `agents/*.md` and `hooks/*.sh` (including `coding-lead.md`) into `~/.claude/agents/` and `~/.claude/hooks/`, so `git pull` alone keeps their content current afterward — re-run the script only if agent or hook *files* are added, removed, or renamed upstream, not for ordinary edits to existing files. It only supports the global scope; for a project-scoped install, use the manual steps below instead (see the note on `coding-lead.md` in the Project-scoped block just below).
+
 Pick one:
 
 **Global (all projects, all sessions):**
@@ -23,6 +25,14 @@ cp agents/*.md ~/.claude/agents/
 mkdir -p .claude/agents
 cp agents/*.md .claude/agents/
 ```
+
+**Note on `coding-lead.md` specifically:** this repo's copy of that file now hardcodes the *global* hook path (`$HOME/.claude/hooks/coding-lead-agent-guard.sh`) directly in its frontmatter. If you copy it into a project-scoped `.claude/agents/` here, edit that one `command:` line in your copy back to the project-scoped form before it will work:
+
+```yaml
+          command: "${CLAUDE_PROJECT_DIR}/hooks/coding-lead-agent-guard.sh"
+```
+
+See the `coding-lead-agent-guard.sh` subsection under step 2 for why.
 
 ### Making `boss` the main agent
 
@@ -56,6 +66,8 @@ cp hooks/coding-lead-agent-guard.sh hooks/post-edit-format.sh hooks/pre-handback
 chmod +x ~/.claude/hooks/coding-lead-agent-guard.sh ~/.claude/hooks/post-edit-format.sh ~/.claude/hooks/pre-handback-architect-gate.sh
 ```
 
+*(Or run `./scripts/sync-claude-config.sh` once instead of the manual steps above — see the shortcut note in step 1.)*
+
 **Project-scoped:**
 
 ```bash
@@ -66,7 +78,7 @@ chmod +x .claude/hooks/coding-lead-agent-guard.sh .claude/hooks/post-edit-format
 
 ### `coding-lead-agent-guard.sh`
 
-This hook enforces, at the tool-call level, that `coding-lead` can only dispatch `coder` — it denies any other `subagent_type` on `coding-lead`'s `Agent` calls. It is not wired through `settings.json`; it's wired directly in `agents/coding-lead.md`'s own frontmatter:
+This hook enforces, at the tool-call level, that `coding-lead` can only dispatch `coder` — it denies any other `subagent_type` on `coding-lead`'s `Agent` calls. It is not wired through `settings.json`; it's wired directly in `agents/coding-lead.md`'s own frontmatter, which in this repo now reads:
 
 ```yaml
 hooks:
@@ -74,13 +86,13 @@ hooks:
     - matcher: "Agent"
       hooks:
         - type: command
-          command: "${CLAUDE_PROJECT_DIR}/hooks/coding-lead-agent-guard.sh"
+          command: "$HOME/.claude/hooks/coding-lead-agent-guard.sh"
 ```
 
-**Gotcha:** `${CLAUDE_PROJECT_DIR}` only resolves correctly if you installed `coding-lead.md` and the hook *project-scoped*, in the same project. If you installed the agents and hooks **globally** (`~/.claude/agents/`, `~/.claude/hooks/`), this line will not resolve to your global hooks directory and the guard will silently fail to fire. Edit the `command` line in your installed copy of `coding-lead.md` to point at the global path instead:
+This is already the **global**-install form, so a global install (including via `scripts/sync-claude-config.sh`) works with no edits needed. **Gotcha (project-scoped installs only):** if you instead copy `coding-lead.md` into a project-scoped `.claude/agents/`, `$HOME` will resolve to your real home directory rather than that project's hooks folder, and the guard will fire against the wrong (or a nonexistent) path. Edit the `command` line in your project-scoped copy back to the project-scoped form:
 
 ```yaml
-          command: "$HOME/.claude/hooks/coding-lead-agent-guard.sh"
+          command: "${CLAUDE_PROJECT_DIR}/hooks/coding-lead-agent-guard.sh"
 ```
 
 ### `post-edit-format.sh`

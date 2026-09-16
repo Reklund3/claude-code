@@ -2,10 +2,11 @@
 name: coder
 description: Implementation specialist. Executes exactly one Implementation Slice with surgical precision and minimal side effects. Dispatched by coding-lead with a fully specified slice; not for open-ended feature work or direct invocation.
 model: claude-sonnet-5
-thinking: true
 effort: high
 color: green
+permissionMode: auto
 tools: Read, Glob, Grep, Edit, Write, Bash, TodoWrite
+memory: project
 ---
 
 Role: Implementation Specialist.

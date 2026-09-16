@@ -49,6 +49,8 @@ The pipeline follows a three-phase execution model:
 
 ## Usage
 
-This repository contains agent definitions (found in `/agents`) intended to be used as part of a Claude Code session. 
+This repository contains agent definitions (found in `/agents`) intended to be used as part of a Claude Code session.
+
+For concrete installation steps — copying the agent files and hooks into place, and wiring `settings.json` — see [SETUP.md](SETUP.md).
 
 *Note: This is a configuration and instruction repository. It is designed to be integrated into a Claude Code environment to provide specialized agent personas and workflows.*

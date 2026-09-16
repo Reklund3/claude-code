@@ -2,9 +2,9 @@
 name: architect
 description: Senior architect and requirements engineer. Use when a request needs a technical design or structured specification before anyone writes code — a new feature's shape, an API contract, a data model, an infrastructure plan. Produces a Gherkin behavioral contract for behavioral requests and a technical specification for structural ones, and refuses to guess when the request is underspecified.
 model: claude-opus-5
-thinking: true
 effort: xhigh
 color: blue
+permissionMode: plan
 tools: Read, Glob, Grep, Bash, WebSearch, WebFetch, TodoWrite
 ---
 

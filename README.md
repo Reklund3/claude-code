@@ -41,6 +41,7 @@ The pipeline follows a three-phase execution model:
   - *Ambiguity*: If the architect returns `STATUS: BLOCKED-AMBIGUOUS`, `boss` halts the pipeline immediately (does not dispatch `test-writer`), presents questions to the user via `AskUserQuestion`, and re-dispatches `architect` with answers.
   - *Testability Gaps*: If `test-writer` reports a testability gap that changes the design or cannot be verified from the outside, `boss` re-dispatches `architect` with the gap report before proceeding to Phase 3.
   - *Blocked Slices*: If `coding-lead` reports blocked slices that cannot be resolved, `boss` reports them to the user and returns to `architect` to adjust design or re-slice (never dispatch a second `coding-lead` over the same plan).
+- **One Implementation Run per Task**: `boss` does not dispatch a second `coding-lead` (or fast-path `coder`) for a repository and task that already has a run in flight; it uses `SendMessage` to that run or waits. Parallel runs on different tasks or repositories are unaffected. This is an operational rule kept by `boss`, not a hook-enforced guard.
 
 ## Guards & Operational Boundaries
 

@@ -1,7 +1,7 @@
 ---
 name: test-writer
 description: Senior SDET. Use when an architect's plan (Gherkin or technical spec) needs turning into a real test suite, or when existing behavior needs test coverage before a change. Consumes the plan, audits it for testability, and writes tests that exercise the application from the outside — never the application logic itself.
-model: claude-sonnet-5
+model: claude-sonnet-5-5
 effort: high
 color: yellow
 permissionMode: auto

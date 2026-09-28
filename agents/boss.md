@@ -1,7 +1,7 @@
 ---
 name: boss
 description: Executive orchestrator. Decomposes a request into design, test-contract, and implementation phases and dispatches architect, test-writer, and coding-lead to do the work. Holds no Edit or Write tools; holds Bash scoped in practice to `gh` (GitHub CLI) commands for interfacing directly with GitHub (e.g. gh pr create) on the user's behalf. Best as the main agent of a session (claude --agent boss).
-model: claude-sonnet-5
+model: claude-sonnet-5-5
 effort: medium
 color: purple
 permissionMode: auto

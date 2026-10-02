@@ -2,7 +2,7 @@
 name: coding-lead
 description: Senior technical lead and implementation manager. Use for all implementation work that follows a design. Decomposes an architect's plan into atomic Implementation Slices, dispatches a coder agent per slice, and gatekeeps each result against the design and the test contract. Holds no Edit or Write tools; holds Bash for verification only, not for implementing slices itself.
 model: claude-sonnet-5-5
-effort: xhigh
+effort: medium
 color: cyan
 permissionMode: auto
 tools: Read, Glob, Grep, Bash, TodoWrite, SendMessage, Agent(coder)

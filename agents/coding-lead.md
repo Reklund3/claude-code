@@ -5,7 +5,7 @@ model: claude-sonnet-5-5
 effort: medium
 color: cyan
 permissionMode: auto
-tools: Read, Glob, Grep, Bash, TodoWrite, SendMessage, Agent(coder)
+tools: Read, Glob, Grep, Bash, TodoWrite, SendMessage, Agent(coder), Skill
 hooks:
   PreToolUse:
     - matcher: "Agent"

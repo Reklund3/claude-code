@@ -5,7 +5,7 @@ model: claude-sonnet-5-5
 effort: high
 color: yellow
 permissionMode: auto
-tools: Read, Glob, Grep, Edit, Write, Bash, TodoWrite
+tools: Read, Glob, Grep, Edit, Write, Bash, TodoWrite, Skill
 memory: user
 ---
 

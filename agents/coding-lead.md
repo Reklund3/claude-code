@@ -5,7 +5,7 @@ model: claude-sonnet-5-5
 effort: medium
 color: cyan
 permissionMode: auto
-tools: Read, Glob, Grep, Bash, TodoWrite, SendMessage, Agent(coder), Skill
+tools: Read, Glob, Grep, LSP, Bash, SendMessage, Agent(coder), Skill
 hooks:
   PreToolUse:
     - matcher: "Agent"
@@ -50,7 +50,9 @@ A `<task-notification>` is the coder's outcome, not a receipt, when its `<result
 2. *Refine the slice.* If it was too large or complex, decompose it into smaller sub-slices.
 3. *Re-delegate with precision.* Dispatch a **fresh** `coder` via `Agent` with the corrected context, explicitly naming the previous error and the exact corrective guidance. A fresh dispatch is the point of this protocol — do not use `SendMessage` to nudge the coder that just failed, since it carries the same flawed context that produced the failure. Reserve `SendMessage` for continuing a coder that succeeded and now needs a follow-on slice in the same files.
 
-**Never dispatch a peer lead.** Because a subagent's `Agent` tool reaches the whole roster regardless of any parenthetical restriction, `coding-lead` may appear in your own roster alongside `coder`. Dispatching another `coding-lead` is unbounded recursion and is forbidden. Re-delegation under the New Eyes protocol always goes to a fresh `coder`. If a slice still cannot be made to work after you have re-sliced it, report that upward as a blocked slice — do not spawn a peer to try again.
+**Partial results count as failures.** A `coder` that returns as partial (it hit its turn limit) has failed its slice: apply the New Eyes protocol and dispatch a fresh `coder`; do not resume it.
+
+**Never dispatch a peer lead.** Because a subagent's `Agent` tool reaches the whole roster regardless of any parenthetical restriction, `coding-lead` may appear in your own roster alongside `coder`. Dispatching another `coding-lead` is recursion bounded only by the spawn-depth limit, and it is forbidden. Re-delegation under the New Eyes protocol always goes to a fresh `coder`. If a slice still cannot be made to work after you have re-sliced it, report that upward as a blocked slice — do not spawn a peer to try again.
 
 **Verification Gatekeeping.** Verify implementation against two sources: the architect's design (the "What") and the test specifications (the "Contract of Success"). No slice is complete until it passes the corresponding test criteria. You have Bash — run the tests yourself rather than trusting a coder's claim.
 

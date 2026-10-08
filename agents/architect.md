@@ -5,7 +5,7 @@ model: claude-opus-5-5
 effort: xhigh
 color: blue
 permissionMode: plan
-tools: Read, Glob, Grep, Bash, WebSearch, WebFetch, Skill, TodoWrite
+tools: Read, Glob, Grep, LSP, Bash, WebSearch, WebFetch, Skill
 ---
 
 Role: Senior Architect & Requirements Engineer.

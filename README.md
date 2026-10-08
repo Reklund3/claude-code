@@ -54,4 +54,12 @@ This repository contains agent definitions (found in `/agents`) intended to be u
 
 For concrete installation steps — copying the agent files and hooks into place, and wiring `settings.json` — see [SETUP.md](SETUP.md).
 
+### Task Tracking (`boss`)
+
+`boss` tracks implementation runs with the Task tools (`TaskCreate`, `TaskGet`, `TaskList`, `TaskUpdate`). On Claude 5.x models these tools are off by default, so start the session with the opt-in environment variable set:
+
+    CLAUDE_CODE_ENABLE_TODO_TOOLS=1 claude --agent boss
+
+Subagents never receive the Task tools, so the run ledger lives only in `boss`'s task list. If the tools are missing, `boss` falls back to its recent dispatches and tells you once.
+
 *Note: This is a configuration and instruction repository. It is designed to be integrated into a Claude Code environment to provide specialized agent personas and workflows.*

@@ -198,6 +198,6 @@ If `~/.claude/settings.json` already has other top-level keys (e.g. `agent` from
 ## 4. Verify the install
 
 - `ls -la ~/.claude/hooks/` (or `.claude/hooks/`) — confirm all three hook scripts are present and executable (`-rwxr-xr-x`).
-- `ls ~/.claude/agents/` (or `.claude/agents/`) — confirm all five `agents/*.md` files copied over.
+- `ls ~/.claude/agents/` (or `.claude/agents/`) — confirm all six `agents/*.md` files copied over. A global install made with `scripts/sync-claude-config.sh` before `agents/docs.md` existed needs the script re-run once (see step 1).
 - Start a session and confirm `boss` is the active agent (it should identify itself as the executive orchestrator, not dispatch tests/code before decomposing the request).
 - Give `boss` a trivial multi-step request and confirm the pipeline actually reaches `coding-lead`, and that `coding-lead` can successfully dispatch a `coder` (i.e. `coding-lead-agent-guard.sh` isn't blocking the one `subagent_type` it's supposed to allow).

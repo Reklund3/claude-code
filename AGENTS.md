@@ -12,6 +12,10 @@ The pipeline follows a strict sequence to ensure design-led implementation:
 4.  **`coding-lead` (Management)**: Decomposes the plan into atomic **Implementation Slices** and manages `coder` agents.
 5.  **`coder` (Implementation)**: Executes a single, highly specific slice.
 
+Support agent (not a pipeline phase):
+
+- **`docs` (Reference lookup)**: Read-only (`Read`, `WebFetch`, `WebSearch`). `boss` dispatches it to pull API reference pages verbatim with source URLs. `coding-lead` cannot dispatch it, because its guard hook allows only `coder`.
+
 ## Critical Operational Rules
 
 - **The Contract is Prose**: The architect's output is the "contract." It must be pasted in full into the prompts for `test-writer` and `coding-lead`.
@@ -24,12 +28,15 @@ The pipeline follows a strict sequence to ensure design-led implementation:
   - *Testability Gaps*: If `test-writer` reports a testability gap that changes the design or cannot be verified from the outside, `boss` re-dispatches `architect` with the gap report before proceeding to Phase 3.
   - *Blocked Slices*: If `coding-lead` reports blocked slices that cannot be resolved, `boss` reports them to the user and returns to `architect` to adjust design or re-slice (never dispatch a second `coding-lead` over the same plan).
 - **One Implementation Run per Task**: Before dispatching a `coding-lead` or a fast-path `coder`, `boss` checks its task list (`TaskList`) and recent dispatches for a run already in flight on the same repository and task. If one exists, it sends the additional work to that run with `SendMessage` or waits for it to hand back, rather than dispatching a second. Concurrent runs on different tasks or different repositories are fine.
+- **Two-Strike Stop**: If the same failure (same failing test or command, same error signature) recurs on a slice after one fresh-`coder` re-dispatch, `coding-lead` stops that slice and reports it on a line beginning `BLOCKED:` with both verification outputs pasted. It never dispatches a third `coder` for that slice. `boss` then follows the Blocked Slices escalation.
+- **Advisor Checkpoints (`boss` only)**: When an `advisor` tool is available, `boss` consults it (1) on a `coding-lead` hand-back with a `BLOCKED:` slice, before choosing the next step, and (2) before its final synthesis of any request that dispatched `architect`, `test-writer`, `coding-lead`, or `coder`. There is no boss-side checkpoint before a plan locks, because `architect` already runs on Opus. Other agents do not take these checkpoints from this file; their own definitions govern them.
 
 ## Known Constraints & Quirks
 
 - **Bash Boundary**: `architect` and `coding-lead` hold `Bash` access (for research/inspection and verification respectively), but refraining from altering the codebase or implementing code is an operational boundary kept by the role, not a structural restriction enforced by the tool grant.
 - **Duplicate-Dispatch Boundary**: The one-run-per-task rule is kept by `boss`'s judgment, not enforced by any hook or tool grant; nothing technically stops a second `coding-lead` over the same task. A hook-enforced version was designed and tested but deferred.
-- **Subagent Deadlock Rule**: Subagents (`architect`, `test-writer`, `coding-lead`, `coder`) have no interactive channel to the user (cannot use `AskUserQuestion`) and must NEVER pause to wait for user approval; any ambiguities or blockers must be returned directly in the final report to halt execution cleanly rather than guessing speculatively or causing deadlocks.
+- **Subagent Deadlock Rule**: Subagents (`architect`, `test-writer`, `coding-lead`, `coder`, `docs`) have no interactive channel to the user (cannot use `AskUserQuestion`) and must NEVER pause to wait for user approval; any ambiguities or blockers must be returned directly in the final report to halt execution cleanly rather than guessing speculatively or causing deadlocks.
 - **Context Loss**: Subagents do not inherit the main conversation's "auto memory."
 - **Relayed Consent Is Not User Consent**: Subagents will correctly refuse to edit `~/.claude/rules/` or `~/.claude/agents/` files even when a dispatching agent claims the user authorized it. This is documented Claude Code behavior, not a bug or over-caution: a relayed approval claim from another agent is never treated as user consent — only a direct main-session user message, or the permission system itself, can authorize config/permission changes.
 - **Task Tools Are Opt-In**: Task tools are opt-in on 5.x models (`CLAUDE_CODE_ENABLE_TODO_TOOLS=1`). Subagents run in the background and never receive them, so the implementation-run ledger lives only in boss's task list.
+- **Advisor Is Opt-In and Unenforceable**: The advisor is an experimental server tool, enabled by `/advisor`, the `advisorModel` setting, or `--advisor`, and available on the Anthropic API only. It has no tool name that `tools:`, permission rules, or hook matchers can reference, so the advisor checkpoints are prose that `boss` keeps, not a gate. Subagents inherit the configured advisor when their own model passes the pairing check.

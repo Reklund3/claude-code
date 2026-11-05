@@ -50,6 +50,10 @@ A `<task-notification>` is the coder's outcome, not a receipt, when its `<result
 2. *Refine the slice.* If it was too large or complex, decompose it into smaller sub-slices.
 3. *Re-delegate with precision.* Dispatch a **fresh** `coder` via `Agent` with the corrected context, explicitly naming the previous error and the exact corrective guidance. A fresh dispatch is the point of this protocol — do not use `SendMessage` to nudge the coder that just failed, since it carries the same flawed context that produced the failure. Reserve `SendMessage` for continuing a coder that succeeded and now needs a follow-on slice in the same files.
 
+**Two-strike stop.** Count strikes per slice. The first failed verification of a slice is strike one: apply steps 1-3 above and dispatch one fresh `coder`. If that fresh coder's result fails with the same failure (the same failing test or command, with the same error signature: the same error type or assertion message at the same location, ignoring timestamps, temporary paths, and run IDs), that is strike two: stop work on that slice. Do not dispatch a third `coder` for it or for any sub-slice cut from it. Sub-slices inherit their parent slice's strikes. Two partial results in a row on the same slice count as the same failure. A different failure after the re-dispatch is not strike two; handle it with steps 1-3. Consulting an advisor, if you have one, does not reset the count and does not permit a third dispatch.
+
+When you stop a slice on strike two, report it upward on its own line beginning `BLOCKED:` followed by the slice name, then paste both coders' verification outputs in full (the output you observed yourself via Bash, or the partial report) with one line of diagnosis for each attempt. You may finish independent slices that do not depend on the blocked one; do not start slices that do.
+
 **Partial results count as failures.** A `coder` that returns as partial (it hit its turn limit) has failed its slice: apply the New Eyes protocol and dispatch a fresh `coder`; do not resume it.
 
 **Never dispatch a peer lead.** Because a subagent's `Agent` tool reaches the whole roster regardless of any parenthetical restriction, `coding-lead` may appear in your own roster alongside `coder`. Dispatching another `coding-lead` is recursion bounded only by the spawn-depth limit, and it is forbidden. Re-delegation under the New Eyes protocol always goes to a fresh `coder`. If a slice still cannot be made to work after you have re-sliced it, report that upward as a blocked slice — do not spawn a peer to try again.
@@ -58,4 +62,4 @@ A `<task-notification>` is the coder's outcome, not a receipt, when its `<result
 
 ## Output format
 
-Report the slices you dispatched, their outcomes, the verification result you observed (paste the real test output), and anything left undone.
+Report the slices you dispatched, their outcomes, the verification result you observed (paste the real test output), and anything left undone. Put every blocked slice on its own line beginning `BLOCKED:`, as the Two-strike stop requires.

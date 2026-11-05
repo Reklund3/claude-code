@@ -26,6 +26,7 @@ The pipeline follows a three-phase execution model:
 | **`test-writer`** | Senior SDET | Implements reliable test suites that verify the application against the design. |
 | **`coding-lead`** | Technical Lead | Manages implementation by slicing tasks and overseeing `coder` agents. |
 | **`coder`** | Implementation Specialist | Executes specific, atomic slices of code with minimal side effects. |
+| **`docs`** | Reference Lookup | Pulls API reference pages verbatim, read-only, for `boss`. |
 
 ## Key Principles
 
@@ -42,6 +43,8 @@ The pipeline follows a three-phase execution model:
   - *Testability Gaps*: If `test-writer` reports a testability gap that changes the design or cannot be verified from the outside, `boss` re-dispatches `architect` with the gap report before proceeding to Phase 3.
   - *Blocked Slices*: If `coding-lead` reports blocked slices that cannot be resolved, `boss` reports them to the user and returns to `architect` to adjust design or re-slice (never dispatch a second `coding-lead` over the same plan).
 - **One Implementation Run per Task**: `boss` does not dispatch a second `coding-lead` (or fast-path `coder`) for a repository and task that already has a run in flight; it uses `SendMessage` to that run or waits. Parallel runs on different tasks or repositories are unaffected. This is an operational rule kept by `boss`, not a hook-enforced guard.
+- **Two-Strike Stop**: If the same failure (same failing test or command, same error signature) recurs on a slice after one fresh-`coder` re-dispatch, `coding-lead` stops that slice and reports it on a line beginning `BLOCKED:` with both verification outputs pasted. It never dispatches a third `coder` for that slice. `boss` then follows the Blocked Slices escalation.
+- **Advisor Checkpoints (`boss` only)**: When an `advisor` tool is available, `boss` consults it (1) on a `coding-lead` hand-back with a `BLOCKED:` slice, before choosing the next step, and (2) before its final synthesis of any request that dispatched `architect`, `test-writer`, `coding-lead`, or `coder`. There is no boss-side checkpoint before a plan locks, because `architect` already runs on Opus. Other agents do not take these checkpoints from this file; their own definitions govern them.
 
 ## Guards & Operational Boundaries
 
@@ -61,5 +64,15 @@ For concrete installation steps — copying the agent files and hooks into place
     CLAUDE_CODE_ENABLE_TODO_TOOLS=1 claude --agent boss
 
 Subagents never receive the Task tools, so the run ledger lives only in `boss`'s task list. If the tools are missing, `boss` falls back to its recent dispatches and tells you once.
+
+### Advisor (optional)
+
+`boss`'s advisor checkpoints (see [AGENTS.md](AGENTS.md)) apply only when an advisor is enabled. Enable one with `/advisor opus`, the `advisorModel` setting, or the launch flag:
+
+    CLAUDE_CODE_ENABLE_TODO_TOOLS=1 claude --agent boss --advisor opus
+
+The flag is not listed in `claude --help`; see https://code.claude.com/docs/en/advisor.
+
+The advisor is experimental and needs the Anthropic API. A Haiku 5.5 main session with an Opus advisor needs Claude Code v2.1.293 or later. Under `claude --agent boss` the main thread takes the `model:` set in `agents/boss.md` (per the Claude Code subagents docs); how a model flag, `ANTHROPIC_MODEL`, or a settings `model` ranks against it is undocumented, so these launch lines set none.
 
 *Note: This is a configuration and instruction repository. It is designed to be integrated into a Claude Code environment to provide specialized agent personas and workflows.*

@@ -11,9 +11,10 @@
 # destination path, including a user's own manual customizations or prior
 # manual copies of these files. This is by design.
 #
-# Re-run this script only if the *set* of files under agents/ or hooks/
-# changes (a file added, removed, or renamed) — not for ordinary edits to
-# existing files, since those are picked up live through the symlinks.
+# Re-run this script whenever the *set* of files under agents/ or hooks/
+# changes (a file added, removed, or renamed). It links new files and removes
+# links whose repo file is gone. Ordinary edits to existing files are picked
+# up live through the symlinks.
 
 set -euo pipefail
 
@@ -24,6 +25,28 @@ AGENTS_DEST="$HOME/.claude/agents"
 HOOKS_DEST="$HOME/.claude/hooks"
 
 mkdir -p "$AGENTS_DEST" "$HOOKS_DEST"
+
+# Remove links in a destination that point into this repo at files that no
+# longer exist (a file removed or renamed upstream).
+prune_dangling() {
+  local dest="$1" link target
+  for link in "$dest"/*; do
+    [ -L "$link" ] || continue
+    target="$(readlink "$link")"
+    case "$target" in
+      "$REPO_ROOT"/*)
+        if [ ! -e "$link" ]; then
+          rm "$link"
+          echo "  pruned $(basename "$link") (target removed: $target)"
+        fi
+        ;;
+    esac
+  done
+}
+
+echo "Pruning stale links:"
+prune_dangling "$AGENTS_DEST"
+prune_dangling "$HOOKS_DEST"
 
 echo "Syncing agents:"
 for f in "$REPO_ROOT"/agents/*.md; do
@@ -41,4 +64,4 @@ for f in "$REPO_ROOT"/hooks/*.sh; do
 done
 
 echo
-echo "Done. This is a one-time/occasional bootstrap — re-run only if the set of files under agents/ or hooks/ changes, not for ordinary content edits."
+echo "Done. Re-run whenever files under agents/ or hooks/ are added, removed, or renamed."

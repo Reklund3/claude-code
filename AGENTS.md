@@ -6,7 +6,7 @@ This repository implements a multi-phase agent orchestration pipeline.
 
 The pipeline follows a strict sequence to ensure design-led implementation:
 
-1.  **`boss` (Executive Orchestrator)**: The main thread. Decomposes requests into phases. **Does not write code.** Holds Bash scoped in practice to `gh` (GitHub CLI) commands for interfacing with GitHub directly — an operational boundary, not a tool-enforced one.
+1.  **`boss` (Executive Orchestrator)**: The main thread. Decomposes requests into phases. **Does not write code.** Holds Bash scoped in practice to `gh` (GitHub CLI) and `git` commands for interfacing with GitHub and reading repository history — an operational boundary, not a tool-enforced one.
 2.  **`architect` (Design)**: Researches and produces a **Gherkin Behavioral Contract** or a **Technical Specification**. This is the source of truth for all downstream agents.
 3.  **`test-writer` (Contract)**: Consumes the architect's plan to implement a test suite. **Writes tests before implementation.**
 4.  **`coding-lead` (Management)**: Decomposes the plan into atomic **Implementation Slices** and manages `coder` agents.
